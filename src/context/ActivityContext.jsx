@@ -44,6 +44,9 @@ export const ActivityProvider = ({ children }) => {
   const setFilter = (filterValue) =>
     dispatch({ type: "SET_FILTER", payload: filterValue });
 
+  const toggleGoal = (id) =>
+    dispatch({ type: "TOGGLE_GOAL", payload: id });
+
   return (
     <ActivityContext.Provider
       value={{
@@ -51,6 +54,7 @@ export const ActivityProvider = ({ children }) => {
         loading: state.loading,
         filter: state.filter,
         setFilter,
+        toggleGoal,
       }}
     >
       {children}

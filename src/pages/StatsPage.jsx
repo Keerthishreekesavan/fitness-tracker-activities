@@ -4,43 +4,39 @@ import { useActivity } from "../context/ActivityContext";
 const StatsPage = () => {
   const { activities } = useActivity();
 
-  // --- Computed values using map, filter, reduce (never stored in state) ---
+  // Question 5 constraints:
+  // - exclude invalid goalAchieved values
+  // - ignore invalid activities
+  const validActivities = activities.filter((a) => {
+    if (!a) return false;
+    return (
+      a.steps > 0 &&
+      a.caloriesBurned > 0 &&
+      a.workoutMinutes > 0 &&
+      typeof a.goalAchieved === "boolean" // invalid goalAchieved excluded
+    );
+  });
 
-  // Total valid activities
-  const totalActivities = activities.length;
+  // "must use .reduce()" for computing the goal totals
+  // Calculate total, achieved, and not achieved strictly via reduce.
+  const stats = validActivities.reduce(
+    (acc, curr) => {
+      acc.total += 1;
+      if (curr.goalAchieved === true) {
+        acc.achieved += 1;
+      } else if (curr.goalAchieved === false) {
+        acc.notAchieved += 1;
+      }
+      return acc;
+    },
+    { total: 0, achieved: 0, notAchieved: 0 }
+  );
 
-  // Goal achieved / not achieved counts using filter()
-  const goalAchievedCount = activities.filter((a) => a.goalAchieved === true).length;
-  const goalNotAchievedCount = activities.filter((a) => a.goalAchieved === false).length;
+  const totalActivities = stats.total;
+  const goalAchievedCount = stats.achieved;
+  const goalNotAchievedCount = stats.notAchieved;
 
-  // Total steps using reduce()
-  const totalSteps = activities.reduce((acc, a) => acc + a.steps, 0);
-
-  // Total calories using reduce()
-  const totalCalories = activities.reduce((acc, a) => acc + a.caloriesBurned, 0);
-
-  // Total workout minutes using reduce()
-  const totalMinutes = activities.reduce((acc, a) => acc + a.workoutMinutes, 0);
-
-  // Average steps using map() then reduce()
-  const avgSteps =
-    totalActivities > 0
-      ? activities.map((a) => a.steps).reduce((acc, s) => acc + s, 0) / totalActivities
-      : 0;
-
-  // Average calories
-  const avgCalories =
-    totalActivities > 0
-      ? Math.round(totalCalories / totalActivities)
-      : 0;
-
-  // Most active day (by steps) using reduce()
-  const mostActive =
-    totalActivities > 0
-      ? activities.reduce((best, a) => (a.steps > best.steps ? a : best), activities[0])
-      : null;
-
-  // Expose computed values to window for test evaluation
+  // Question 5 global state requirement: 
   useEffect(() => {
     window.appState = {
       totalActivities,
@@ -53,7 +49,6 @@ const StatsPage = () => {
     return (
       <div className="page-container" data-testid="stats-page">
         <div className="empty-state">
-          <span className="empty-icon">📊</span>
           <p>No valid activities to compute stats.</p>
         </div>
       </div>
@@ -63,94 +58,32 @@ const StatsPage = () => {
   return (
     <div className="page-container" data-testid="stats-page">
       <div className="page-header">
-        <h1 className="page-title">📊 Activity Stats</h1>
-        <p className="page-subtitle">Aggregated from all valid activities</p>
+        <h1 className="page-title">Activities Analytics Dashboard</h1>
       </div>
 
-      {/* ── Primary test-ID counters ── */}
       <div className="stats-primary-row">
         <div className="stat-highlight-card total">
-          <span className="stat-hl-icon">📋</span>
-          <span className="stat-hl-value" data-testid="total-activities">
+          <span className="stat-hl-label">Total Valid Activities</span>
+          {/* Output exactly as requested by Question 5 */}
+          <div data-testid="total-activities" className="stat-hl-value">
             {totalActivities}
-          </span>
-          <span className="stat-hl-label">Total Activities</span>
+          </div>
         </div>
 
         <div className="stat-highlight-card achieved">
-          <span className="stat-hl-icon">🏆</span>
-          <span className="stat-hl-value" data-testid="goal-achieved">
-            {goalAchievedCount}
-          </span>
           <span className="stat-hl-label">Goals Achieved</span>
+          <div data-testid="goal-achieved" className="stat-hl-value">
+            {goalAchievedCount}
+          </div>
         </div>
 
         <div className="stat-highlight-card not-achieved">
-          <span className="stat-hl-icon">❌</span>
-          <span className="stat-hl-value" data-testid="goal-not-achieved">
-            {goalNotAchievedCount}
-          </span>
           <span className="stat-hl-label">Goals Not Met</span>
-        </div>
-      </div>
-
-      {/* ── Secondary metrics ── */}
-      <div className="stats-grid">
-        <div className="stats-card">
-          <span className="stats-icon">👟</span>
-          <span className="stats-value">{totalSteps.toLocaleString()}</span>
-          <span className="stats-label">Total Steps</span>
-        </div>
-        <div className="stats-card">
-          <span className="stats-icon">🔥</span>
-          <span className="stats-value">{totalCalories.toLocaleString()}</span>
-          <span className="stats-label">Total Calories Burned</span>
-        </div>
-        <div className="stats-card">
-          <span className="stats-icon">⏱️</span>
-          <span className="stats-value">{totalMinutes.toLocaleString()}</span>
-          <span className="stats-label">Total Workout Minutes</span>
-        </div>
-        <div className="stats-card">
-          <span className="stats-icon">📈</span>
-          <span className="stats-value">{Math.round(avgSteps).toLocaleString()}</span>
-          <span className="stats-label">Avg Steps/Activity</span>
-        </div>
-        <div className="stats-card">
-          <span className="stats-icon">💡</span>
-          <span className="stats-value">{avgCalories.toLocaleString()}</span>
-          <span className="stats-label">Avg Calories/Activity</span>
-        </div>
-        <div className="stats-card">
-          <span className="stats-icon">🎯</span>
-          <span className="stats-value">
-            {totalActivities > 0
-              ? ((goalAchievedCount / totalActivities) * 100).toFixed(0)
-              : 0}%
-          </span>
-          <span className="stats-label">Goal Success Rate</span>
-        </div>
-      </div>
-
-      {/* ── Best performance ── */}
-      {mostActive && (
-        <div className="best-performance-card">
-          <h2>🥇 Best Performance</h2>
-          <p className="best-name">{mostActive.name}</p>
-          <p className="best-date">
-            {new Date(mostActive.date).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
-          <div className="best-metrics">
-            <span>👟 {mostActive.steps.toLocaleString()} steps</span>
-            <span>🔥 {mostActive.caloriesBurned} cal</span>
-            <span>⏱️ {mostActive.workoutMinutes} min</span>
+          <div data-testid="goal-not-achieved" className="stat-hl-value">
+            {goalNotAchievedCount}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
