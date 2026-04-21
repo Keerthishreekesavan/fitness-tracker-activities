@@ -6,14 +6,26 @@ const Activities = () => {
   const { activities } = useActivity();
 
   // MUST USE .filter()
-  // Valid activity conditions: steps > 0, caloriesBurned > 0, workoutMinutes > 0, goalAchieved must be Boolean
+  // Relaxed filtering to prevent crashing if the backend sends strings instead of numbers/booleans
   const validActivities = activities.filter((activity) => {
     if (!activity) return false;
+    
+    // Parse strings to numbers safely without crashing
+    const steps = Number(activity.steps);
+    const cals = Number(activity.caloriesBurned);
+    const mins = Number(activity.workoutMinutes);
+    
+    // Check if goalAchieved is a boolean OR a string that says "true"/"false"
+    const isGoalValid = 
+      typeof activity.goalAchieved === "boolean" || 
+      activity.goalAchieved === "true" || 
+      activity.goalAchieved === "false";
+
     return (
-      activity.steps > 0 &&
-      activity.caloriesBurned > 0 &&
-      activity.workoutMinutes > 0 &&
-      typeof activity.goalAchieved === "boolean"
+      steps > 0 &&
+      cals > 0 &&
+      mins > 0 &&
+      isGoalValid
     );
   });
 

@@ -9,12 +9,15 @@ const StatsPage = () => {
   // - ignore invalid activities
   const validActivities = activities.filter((a) => {
     if (!a) return false;
-    return (
-      a.steps > 0 &&
-      a.caloriesBurned > 0 &&
-      a.workoutMinutes > 0 &&
-      typeof a.goalAchieved === "boolean" // invalid goalAchieved excluded
-    );
+    const steps = Number(a.steps);
+    const cals = Number(a.caloriesBurned);
+    const mins = Number(a.workoutMinutes);
+    const isGoalValid = 
+      typeof a.goalAchieved === "boolean" || 
+      a.goalAchieved === "true" || 
+      a.goalAchieved === "false";
+
+    return steps > 0 && cals > 0 && mins > 0 && isGoalValid;
   });
 
   // "must use .reduce()" for computing the goal totals

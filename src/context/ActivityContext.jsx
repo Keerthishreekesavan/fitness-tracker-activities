@@ -18,11 +18,11 @@ export const ActivityProvider = ({ children }) => {
     const fetchActivities = async () => {
       try {
         console.log("Fetching token...");
-        // BINGO! We found the secret word.
+
         const tokenRes = await getToken(
           "E0123014",  // Your student ID
           "273582",    // Password
-          "setB",      // The tested and proven dataset name!
+          "setB",      // 
         );
         console.log("Token Response:", tokenRes);
 

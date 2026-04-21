@@ -30,18 +30,21 @@ const FilterPage = () => {
 
   // Interdependency constraint: Base Valid Activities (Question 1 Rules)
   // Must use .filter() and Must not refetch data
-  const baseValidActivities = activities.filter((activity) => {
-    if (!activity) return false;
-    return (
-      activity.steps > 0 &&
-      activity.caloriesBurned > 0 &&
-      activity.workoutMinutes > 0 &&
-      typeof activity.goalAchieved === "boolean"
-    );
+  const validActivities = activities.filter((a) => {
+    if (!a) return false;
+    const steps = Number(a.steps);
+    const cals = Number(a.caloriesBurned);
+    const mins = Number(a.workoutMinutes);
+    const isGoalValid = 
+      typeof a.goalAchieved === "boolean" || 
+      a.goalAchieved === "true" || 
+      a.goalAchieved === "false";
+
+    return steps > 0 && cals > 0 && mins > 0 && isGoalValid;
   });
 
   // Dynamic filter: steps >= input value
-  const filteredActivities = baseValidActivities.filter(
+  const filteredActivities = validActivities.filter(
     (activity) => activity.steps >= appliedThreshold
   );
 
