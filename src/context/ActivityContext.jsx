@@ -17,16 +17,15 @@ export const ActivityProvider = ({ children }) => {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        // Step 1: Get Token — replace studentId & password for exam
         console.log("Fetching token...");
+        // BINGO! We found the secret word.
         const tokenRes = await getToken(
-          "E0123014",  // replace during exam
-          "273582",    // replace during exam
-          "SET B",   // dataset B
+          "E0123014",  // Your student ID
+          "273582",    // Password
+          "setB",      // The tested and proven dataset name!
         );
         console.log("Token Response:", tokenRes);
 
-        // Step 2: Fetch dataset
         console.log("Fetching dataset with token...");
         const activities = await getDataset(tokenRes.token, tokenRes.dataUrl);
         console.log("Raw activities data downloaded:", activities);
@@ -34,6 +33,10 @@ export const ActivityProvider = ({ children }) => {
         dispatch({ type: "SET_ACTIVITIES", payload: activities });
       } catch (err) {
         console.error("Error fetching fitness data:", err.message);
+        if (err.response && err.response.data) {
+          console.error("🔥 BACKEND ERROR MESSAGE 🔥 :", err.response.data);
+          alert("BACKEND REJECTED IT: " + JSON.stringify(err.response.data));
+        }
         dispatch({ type: "SET_ACTIVITIES", payload: [] });
       }
     };
