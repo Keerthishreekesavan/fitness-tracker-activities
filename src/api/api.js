@@ -19,5 +19,9 @@ export const getDataset = async (token, dataUrl) => {
     },
   });
 
-  return data.data;
+  // Depending on what the teacher named it...
+  if (data.data) return data.data;
+  if (data.activities) return data.activities;
+  if (data.items) return data.items;
+  return data;
 };

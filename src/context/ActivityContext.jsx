@@ -27,16 +27,19 @@ export const ActivityProvider = ({ children }) => {
         console.log("Token Response:", tokenRes);
 
         console.log("Fetching dataset with token...");
-        const activities = await getDataset(tokenRes.token, tokenRes.dataUrl);
-        console.log("Raw activities data downloaded:", activities);
+        const rawBody = await getDataset(tokenRes.token, tokenRes.dataUrl);
+        console.log("Raw activities data downloaded:", rawBody);
 
-        dispatch({ type: "SET_ACTIVITIES", payload: activities });
+        // The teacher nested the array inside an object! 
+        // We unpack it here so the Reducer gets the correct Array.
+        let items = [];
+        if (Array.isArray(rawBody)) items = rawBody;
+        else if (Array.isArray(rawBody?.activities)) items = rawBody.activities;
+        else if (Array.isArray(rawBody?.data)) items = rawBody.data;
+
+        dispatch({ type: "SET_ACTIVITIES", payload: items });
       } catch (err) {
         console.error("Error fetching fitness data:", err.message);
-        if (err.response && err.response.data) {
-          console.error("🔥 BACKEND ERROR MESSAGE 🔥 :", err.response.data);
-          alert("BACKEND REJECTED IT: " + JSON.stringify(err.response.data));
-        }
         dispatch({ type: "SET_ACTIVITIES", payload: [] });
       }
     };
